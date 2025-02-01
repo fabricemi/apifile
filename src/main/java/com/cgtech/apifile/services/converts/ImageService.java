@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,14 +24,12 @@ import java.util.Map;
 @RequiredArgsConstructor
 public abstract class ImageService {
     private final StorageProperty storage;
+    private final Logger logger= LoggerFactory.getLogger(ImageService.class);
 
-    public ResponseEntity<?> convertTo(MultipartFile multipartFile, MediaType mediaType) throws IOException {
+    public ResponseEntity<?> convertTo(MultipartFile multipartFile, MediaType mediaType, String sousRep) throws IOException {
         File file=null;
         try{
-            Path path= Paths.get(storage.getUploadImage()).toAbsolutePath().normalize();
-            if(!path.toFile().exists()){
-                Files.createDirectories(path);
-            }
+            Path path =Utils.workDirectory(storage.getUploadImage(), sousRep);
             String reference = Utils.getRandomStr(30);
             Path target = path.resolve(reference + ".pdf");
 
@@ -52,11 +52,6 @@ public abstract class ImageService {
         catch (BadPasswordException e){
 
             return  ResponseEntity.status(500).body(Map.of("is_encrypt", "votre fichier est cryppté "));
-        }
-        finally {
-            if(file!=null){
-                file.delete();
-            }
         }
     }
 

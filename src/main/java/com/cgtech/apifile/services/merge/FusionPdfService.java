@@ -31,16 +31,12 @@ public class FusionPdfService {
     private final Logger logger = LoggerFactory.getLogger(FusionPdfService.class);
 
 
-    public ResponseEntity<?> fusionnerPdf(MultipartFile multipartFile, MultipartFile multipartFile1) throws IOException {
+    public ResponseEntity<?> fusionnerPdf(MultipartFile multipartFile, MultipartFile multipartFile1, String sousRep) throws IOException {
         File file = null;
         File file1 = null;
         File outPutFile=null;
         try {
-            Path path = Paths.get(docStorageProperty.getUploadFile()).toAbsolutePath().normalize();
-
-            if (!path.toFile().exists()) {
-                Files.createDirectories(path);
-            }
+            Path path = Utils.workDirectory(docStorageProperty.getUploadFile(), sousRep);
 
             String reference = Utils.getRandomStr(30);
             Path target = path.resolve(reference + ".pdf");
@@ -82,17 +78,6 @@ public class FusionPdfService {
             return ResponseEntity.status(500).body(Map.of("is_encrypt",
                     "fichier.s cryppté.s "));
 
-        }
-        finally {
-            if (file != null && file.exists()) {
-                boolean delete = file.delete();
-            }
-            if (file1 != null && file1.exists()) {
-                boolean delete = file1.delete();
-            }
-            if (outPutFile != null && outPutFile.exists()) {
-                boolean delete = outPutFile.delete();
-            }
         }
 
     }

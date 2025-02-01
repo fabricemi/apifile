@@ -30,14 +30,11 @@ public class EncryptPdf {
     private final StorageProperty storage;
     private final Logger logger = LoggerFactory.getLogger(EncryptPdf.class);
 
-    public ResponseEntity<?> encrypt(MultipartFile file, String mdp) {
+    public ResponseEntity<?> encrypt(MultipartFile file, String mdp, String sousRep) {
         File fileTmp = null;
-        File fileEncrypted=null;
+        File fileEncrypted = null;
         try {
-            Path path = Paths.get(storage.getUploadFile()).toAbsolutePath().normalize();
-            if (!path.toFile().exists()) {
-                Files.createDirectories(path);
-            }
+            Path path = Utils.workDirectory(storage.getUploadFile(), sousRep);
             String reference = Utils.getRandomStr(30);
 
             Path target = path.resolve(reference + ".pdf");
@@ -69,11 +66,8 @@ public class EncryptPdf {
             logger.error("|ENC| " + e.getMessage());
             return ResponseEntity.status(500).body(Map.of("is_encrypt", "votre fichier est cryppté "));
         } finally {
-            if (fileTmp != null && fileTmp.exists()) {
-                boolean delete = fileTmp.delete();
-            }
-            if (fileEncrypted != null && fileEncrypted.exists()) {
-                boolean delete = fileEncrypted.delete();
+            if (fileTmp != null) {
+                logger.info("fichier tmp supprimé " + fileTmp.delete());
             }
         }
 

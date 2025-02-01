@@ -15,4 +15,5 @@ public class StorageProperty {
     private String uploadFile;
     private String uploadImage;
     private String uploadSplit;
+    private String uploadStandard;
 }

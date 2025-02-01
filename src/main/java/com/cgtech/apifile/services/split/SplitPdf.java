@@ -11,6 +11,10 @@ import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -29,40 +34,62 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class SplitPdf {
     private final StorageProperty docStorageProperty;
+    private Logger logger = LoggerFactory.getLogger(SplitPdf.class);
 
-    public File diviserPdf(MultipartFile multipartFile, int start, int end) throws IOException, StartEndException,BadPasswordException {
-        Path path = Paths.get(docStorageProperty.getUploadSplit()).toAbsolutePath().normalize();
-        if (!path.toFile().exists()) {
-            Files.createDirectories(path);
+    public ResponseEntity<?> diviserPdf(MultipartFile multipartFile, int start, int end, String sousRep) {
+        File file = null;
+        try {
+            Path path =Utils.workDirectory(docStorageProperty.getUploadSplit(),sousRep);
+            String reference = Utils.getRandomStr(16);
+            Path target = path.resolve(reference + ".pdf");
+            multipartFile.transferTo(target);
+            List<File> files = new ArrayList<>();
+            file = new File(path + "/" + reference + ".pdf");
+            try (PdfReader reader = new PdfReader(file);
+
+                 PdfDocument pdf = new PdfDocument(reader)) {
+
+
+                isValidMarge(pdf, start, end, file);
+
+                for (int i = start; i <= end; i++) {
+                    String tmp = Utils.getRandomStr(15);
+
+                    try (
+                            PdfWriter writer = new PdfWriter(path + "/" + tmp + ".pdf");
+                            PdfDocument pdf1 = new PdfDocument(writer)) {
+                        pdf.copyPagesTo(i, i, pdf1);
+                        PdfPage pdfPage = pdf1.getPage(1);
+                        pdfPage.setArtBox(PageSize.A4);
+                    }
+
+
+                    File fileTmp = new File(path + "/" + tmp + ".pdf");
+                    files.add(fileTmp);
+                }
+            }
+
+            File zip = createZip(files, path);
+            deleteFiles(files);
+            deleteFinally(file);
+            return Utils.fileResponse(zip, MediaType.APPLICATION_OCTET_STREAM);
+        } catch (IOException e) {
+            deleteFinally(file);
+            return ResponseEntity.status(500).body(Map.of("error", "une erreur est survenu (" + e.getMessage() + ")"));
+        } catch (BadPasswordException e) {
+            deleteFinally(file);
+            return ResponseEntity.status(500).body(Map.of("is_encrypt", "votre fichier est cryppté "));
+        } catch (StartEndException e) {
+            deleteFinally(file);
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
+    }
 
-        String reference = Utils.getRandomStr(16);
-        Path target = path.resolve(reference + ".pdf");
-        multipartFile.transferTo(target);
-        List<File> files = new ArrayList<>();
-        File file = new File(path + "/" + reference + ".pdf");
-
-        PdfReader reader = new PdfReader(file);
-        PdfDocument pdf = new PdfDocument(reader);
-        isValidMarge(pdf,start,end);
-
-        for (int i = start; i <= end; i++) {
-            String tmp = Utils.getRandomStr(15);
-            PdfDocument pdf1 = new PdfDocument(new PdfWriter(path + "/" + tmp + ".pdf"));
-            pdf.copyPagesTo(i, i, pdf1);
-            PdfPage pdfPage = pdf1.getPage(1);
-            pdfPage.setArtBox(PageSize.A4);
-            pdf1.close();
-
-            File fileTmp = new File(path + "/" + tmp + ".pdf");
-            files.add(fileTmp);
+    private void deleteFinally(File file) {
+        if (file != null) {
+            logger.info("fichier supprimer");
+            boolean delete = file.delete();
         }
-        pdf.close();
-
-        File zip = createZip(files, path);
-        deleteFiles(files);
-
-        return zip;
     }
 
     private File createZip(List<File> files, Path path) throws IOException {
@@ -78,18 +105,20 @@ public class SplitPdf {
         return zip;
     }
 
-    public void isValidMarge(PdfDocument pdf, int start, int end) throws StartEndException {
+    public void isValidMarge(PdfDocument pdf, int start, int end, File file) throws StartEndException {
         if (start <= 0 || end <= 0 || start > end) {
-            throw new StartEndException("Incompatibilité des marges: l'indice est sup ou egal à" +
+            deleteFinally(file);
+            throw new StartEndException("Incompatibilité des marges: l'indice debut est sup ou egal à" +
                     " 1 et doit être inferieur ou egal à l'indice fin.");
         }
         if (start > pdf.getNumberOfPages() || end > pdf.getNumberOfPages()) {
+            deleteFinally(file);
             throw new StartEndException("Incompatibilité des marges : les indices sont hors limites.");
         }
     }
 
-    private void deleteFiles(List<File> files) throws IOException{
-        for (File file:files) {
+    private void deleteFiles(List<File> files) throws IOException {
+        for (File file : files) {
             file.delete();
         }
 

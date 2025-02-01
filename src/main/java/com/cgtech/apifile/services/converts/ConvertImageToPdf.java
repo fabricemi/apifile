@@ -27,15 +27,10 @@ import java.util.Map;
 public class ConvertImageToPdf {
     private final StorageProperty storage;
 
-    public ResponseEntity<?> convertToPdf(MultipartFile multipartFile) throws IOException {
+    public ResponseEntity<?> convertToPdf(MultipartFile multipartFile, String sousRep) throws IOException {
         Path target=null;
         try {
-            Path path= Paths.get(storage.getUploadFile()).toAbsolutePath().normalize();
-            if(!path.toFile().exists()){
-                Files.createDirectories(path);
-            }
-
-
+            Path path=Utils.workDirectory(storage.getUploadImage(),sousRep);
             String reference = Utils.getRandomStr(30);
             String ext = Utils.getExtension(multipartFile.getOriginalFilename());
             target = path.resolve(reference + "." + ext);
