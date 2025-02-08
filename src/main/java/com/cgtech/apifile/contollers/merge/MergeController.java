@@ -24,6 +24,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Contrôleur REST pour la gestion de la fusion de fichiers PDF.
+ * Ce contrôleur expose un endpoint permettant de fusionner deux fichiers PDF.
+ *
+ * Les fichiers PDF fournis dans la requête seront combinés en un seul fichier.
+ ** **Endpoint disponible :**
+ *      /api/merge/pdf
+ * @author Fabrice MISSIDI MBAZI BASSEHA
+ */
 @RestController
 @RequestMapping(path = "/merge")
 @RequiredArgsConstructor
@@ -31,8 +40,17 @@ public class MergeController {
 
     private final FusionPdfService pdfService;
     private final StorageProperty storageProperty;
-    private final Logger logger = LoggerFactory.getLogger(MergeController.class);
+    //private final Logger logger = LoggerFactory.getLogger(MergeController.class);
 
+    /**
+     * Fusionne deux fichiers PDF envoyés dans la requête en un seul fichier PDF.
+     *
+     * @param multipartFile le premier fichier PDF à fusionner, envoyé dans la requête sous le paramètre `fileTop`.
+     * @param multipartFile1 le deuxième fichier PDF à fusionner, envoyé dans la requête sous le paramètre `fileBottom`.
+     * @return ResponseEntity<?> une réponse HTTP contenant le fichier PDF fusionné ou un message d'erreur en cas d'échec.
+     *
+     * @throws IOException si une erreur se produit lors de la lecture ou de l'écriture des fichiers PDF.
+     */
     @PostMapping(path = "/pdf")
     public ResponseEntity<?> fusionner(@RequestParam("fileTop") MultipartFile multipartFile,
                                        @RequestParam("fileBottom") MultipartFile multipartFile1) {
@@ -42,7 +60,7 @@ public class MergeController {
             scheduleForMerge(sousRep);
             return response;
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            //logger.error(e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error",
                     "une erreur est survenu(" + e.getMessage() + ")"));
         }

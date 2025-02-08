@@ -11,8 +11,6 @@ import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -23,19 +21,42 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+
+/**
+ * Service responsable de la division d'un fichier PDF en plusieurs parties.
+ *
+ * Cette classe permet de diviser un fichier PDF en plusieurs sous-documents,
+ * en spécifiant les pages à conserver dans chaque nouveau fichier généré.
+ *
+ * @author Fabrice MISSIDI MBAZI BASSEHA
+ * @version 1.0
+ */
 @Service
 @RequiredArgsConstructor
 public class SplitPdf {
     private final StorageProperty docStorageProperty;
-    private Logger logger = LoggerFactory.getLogger(SplitPdf.class);
+    //private Logger logger = LoggerFactory.getLogger(SplitPdf.class);
 
+
+    /**
+     * Divise un fichier PDF en plusieurs parties en fonction des pages spécifiées.
+     *
+     * Cette méthode extrait une plage de pages du fichier PDF (définie par `start` et `end`)
+     * et génère un nouveau fichier PDF contenant uniquement les pages demandées.
+     *
+     * @param multipartFile Le fichier PDF à diviser.
+     * @param start Le numéro de la première page à inclure dans le fichier résultant.
+     * @param end Le numéro de la dernière page à inclure dans le fichier résultant.
+     * @param sousRep Le sous-répertoire où enregistrer le fichier PDF divisé.
+     * @return Une réponse HTTP contenant le fichier PDF divisé en cas de succès (200 OK),
+     *         ou une erreur (500 Internal Server Error) en cas d'échec.
+     */
     public ResponseEntity<?> diviserPdf(MultipartFile multipartFile, int start, int end, String sousRep) {
         File file = null;
         try {
@@ -87,7 +108,7 @@ public class SplitPdf {
 
     private void deleteFinally(File file) {
         if (file != null) {
-            logger.info("fichier supprimer");
+            //logger.info("fichier supprimer");
             boolean delete = file.delete();
         }
     }

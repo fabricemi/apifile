@@ -15,7 +15,7 @@
 	<artifactId>file</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>file</name>
-	<description>Demo project for Spring Boot</description>
+
 
 	<properties>
 		<java.version>17</java.version>
@@ -92,7 +92,7 @@
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
 			<artifactId>fontbox</artifactId>
-			<version>3.0.0</version>
+			<version>3.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.pdfbox</groupId>
@@ -126,6 +126,12 @@
 			<artifactId>itext7-core</artifactId>
 			<version>7.2.1</version>
 			<type>pom</type>
+		</dependency>
+
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>html2pdf</artifactId>
+			<version>4.0.2</version> <!-- Use the latest version -->
 		</dependency>
 	</dependencies>
 

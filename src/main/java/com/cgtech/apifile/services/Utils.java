@@ -1,6 +1,5 @@
 package com.cgtech.apifile.services;
 
-import com.cgtech.apifile.config.StorageProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
@@ -20,9 +19,24 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * Classe utilitaire fournissant des méthodes pour la gestion des fichiers et des répertoires.
+ *
+ * Cette classe contient des méthodes pour générer des chaînes aléatoires, obtenir des extensions de fichiers,
+ * gérer les réponses de fichiers (téléchargement), supprimer des fichiers et créer des répertoires de travail.
+ *
+ * @author Fabrice MISSIDI MBAZI BASSEHA
+ * @version 1.0
+ */
 public class Utils {
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
+    /**
+     * Génère une chaîne aléatoire de longueur spécifiée.
+     *
+     * @param n Longueur de la chaîne à générer.
+     * @return Une chaîne aléatoire de `n` caractères.
+     */
     public static String getRandomStr(int n) {
         // Choisissez un caractère au hasard à partir de cette chaîne
         String str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvxyz" + "1234567890";
@@ -34,6 +48,12 @@ public class Utils {
         return s.toString();
     }
 
+    /**
+     * Extrait l'extension d'un fichier à partir de son nom.
+     *
+     * @param filename Le nom du fichier.
+     * @return L'extension du fichier (ex: "pdf", "jpg").
+     */
     public static String getExtension(String filename) {
         String extension = "";
         int i = filename.lastIndexOf('.');
@@ -43,6 +63,14 @@ public class Utils {
         return extension;
     }
 
+    /**
+     * Prépare une réponse HTTP contenant un fichier à télécharger.
+     *
+     * @param file Le fichier à envoyer.
+     * @param mediaType Le type de média (ex: PDF, JPEG).
+     * @return Une réponse HTTP avec le fichier comme corps, prête pour le téléchargement.
+     * @throws FileNotFoundException Si le fichier n'est pas trouvé.
+     */
     public static ResponseEntity<?> fileResponse(File file, MediaType mediaType) throws FileNotFoundException {
         try {
 
@@ -64,12 +92,11 @@ public class Utils {
 
     }
 
-    public static void deleteFinally(File file) {
-        if (file != null && file.exists()) {
-            if (file.delete()) {
-            }
-        }
-    }
+    /**
+     * Supprime un répertoire ainsi que tous ses fichiers.
+     *
+     * @param path Le chemin du répertoire à supprimer.
+     */
 
     public static void remove(Path path){
         if (Files.exists(path)) {
@@ -86,6 +113,14 @@ public class Utils {
         }
     }
 
+    /**
+     * Crée un répertoire de travail, y compris les sous-répertoires nécessaires.
+     *
+     * @param parent Le répertoire parent où créer le répertoire de travail.
+     * @param sousRep Le sous-répertoire à créer à l'intérieur du répertoire parent.
+     * @return Le chemin absolu du répertoire de travail créé.
+     * @throws IOException Si une erreur se produit lors de la création des répertoires.
+     */
     public static Path workDirectory(String parent, String sousRep) throws IOException {
         Path paths = Paths.get(parent).toAbsolutePath().normalize();
         if (!paths.toFile().exists()) {

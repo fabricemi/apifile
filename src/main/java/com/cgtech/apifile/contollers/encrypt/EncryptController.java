@@ -5,8 +5,6 @@ import com.cgtech.apifile.config.StorageProperty;
 import com.cgtech.apifile.services.Utils;
 import com.cgtech.apifile.services.encrypts.EncryptPdf;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,16 +14,20 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
+/**
+ * Contrôleur REST pour l'encryption de fichiers PDF.
+ * Ce contrôleur expose un endpoint permettant d'encrypter un fichier PDF avec un mot de passe fourni.
+ *
+ * **Endpoint disponible :**
+ * - /api/encrypt/pdf : Encrypte un fichier PDF avec un mot de passe fourni.
+ * @author Fabrice MISSIDI MBAZI BASSEHA
+ */
 @RestController
 @RequestMapping(path = "/encrypt")
 @RequiredArgsConstructor
@@ -33,8 +35,15 @@ public class EncryptController {
 
     private final EncryptPdf service;
     private final StorageProperty storage;
-    private Logger logger= LoggerFactory.getLogger(EncryptPdf.class);
+    //private Logger logger= LoggerFactory.getLogger(EncryptPdf.class);
 
+    /**
+     * Endpoint pour encrypter un fichier PDF avec un mot de passe.
+     *
+     * @param file Le fichier PDF à encrypter (nom du paramètre : "file").
+     * @param mdp Le mot de passe pour l'encryption du fichier (nom du paramètre : "motdepasse").
+     * @return Une réponse contenant le fichier PDF encrypté ou une erreur en cas d'échec.
+     */
     @PostMapping(path = "/pdf")
     public ResponseEntity<?> encryptFile(@RequestParam("file") MultipartFile file,
                                          @RequestParam("motdepasse") String mdp) {

@@ -14,19 +14,30 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
+/**
+ * Service pour la gestion de la conversion d'images en PDF.
+ *Ce service prend une image en entrée et génère un fichier PDF.
+ *  @author Fabrice MISSIDI MBAZI BASSEHA
+ * @version 1.0
+ */
 @Service
 @RequiredArgsConstructor
 public class ConvertImageToPdf {
     private final StorageProperty storage;
 
+    /**
+     *Convertit une image en fichier PDF.
+     * @param multipartFile Le fichier image à convertir en PDF
+     * @param sousRep sous repertoire de travaille
+     * @return Une réponse HTTP contenant le fichier PDF généré en cas de succès (200 OK),
+     *               ou une erreur (500 Internal Server Error) en cas de problème.
+     * @throws IOException IOException Levée si une erreur de lecture/écriture se produit ou si le fichier n'est pas compatible.
+     */
     public ResponseEntity<?> convertToPdf(MultipartFile multipartFile, String sousRep) throws IOException {
         Path target=null;
         try {
@@ -63,16 +74,6 @@ public class ConvertImageToPdf {
             return ResponseEntity.status(500).body(Map.of("error", "une erreur est survenu (" + e.getMessage() + ")"));
         } catch (BadPasswordException e) {
             return ResponseEntity.status(500).body(Map.of("is_encrypt", "votre fichier est cryppté "));
-        }
-        finally {
-            try {
-                if(target!=null){
-                    Files.delete(target);
-                }
-            }
-            catch (Exception e){
-                //
-            }
         }
     }
 

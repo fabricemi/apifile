@@ -2,6 +2,8 @@ package com.cgtech.apifile.services.standards;
 
 import com.cgtech.apifile.config.StorageProperty;
 import com.cgtech.apifile.services.Utils;
+import com.itextpdf.html2pdf.ConverterProperties;
+import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -12,9 +14,12 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -22,9 +27,9 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 public class GenerateTable {
     private final StorageProperty storageProperty;
-    private Path path;
 
-    public void generate(){
+
+  /*  public void generate(){
 
         try {
            Path path = Utils.workDirectory(storageProperty.getUploadStandard(), "aaaa");
@@ -50,6 +55,29 @@ public class GenerateTable {
             throw new RuntimeException(e);
         }
 
+    }*/
+
+    public File generate(MultipartFile file, String sousRep) throws IOException {
+        Path path=Utils.workDirectory(storageProperty.getUploadStandard(), sousRep);
+
+        String reference=Utils.getRandomStr(10);
+        Path target=path.resolve(reference+"--cgtechtable.html");
+        file.transferTo(target);
+
+        File htmlSource = target.toFile();
+
+        String dstName=Utils.getRandomStr(9)+"--cgtechtable.pdf";
+        File pdfDest = new File(path + File.separator + dstName);
+
+        ConverterProperties converterProperties = new ConverterProperties();
+        FileInputStream fileInputStream=new FileInputStream(htmlSource);
+        FileOutputStream fileOutputStream=new FileOutputStream(pdfDest);
+        HtmlConverter.convertToPdf(fileInputStream,fileOutputStream, converterProperties);
+
+        fileInputStream.close();
+        fileOutputStream.close();
+
+        return pdfDest;
     }
 
 
