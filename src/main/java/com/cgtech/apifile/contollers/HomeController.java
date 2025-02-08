@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * endpoint: /api
  */
-@Controller
+@RestController
 public class HomeController {
 
 
