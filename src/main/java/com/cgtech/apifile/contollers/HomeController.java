@@ -19,7 +19,7 @@ public class HomeController {
     @GetMapping()
     public List<Object> test(){
         return List.of(
-                "servez-vous", "CR7 is the goat", "Contact ici: @fabrice.bassehe@gmail.com");
+                "servez-vous", "CR7 is the goat", "Contact ici: @cgtech.site@gmail.com");
     }
 
 }
